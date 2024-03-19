@@ -4,6 +4,7 @@ const {
   createAudioPlayer,
   createAudioResource,
   joinVoiceChannel,
+  VoiceConnectionDisconnectReason,
 } = require("@discordjs/voice");
 const client = new Client({
   intents: [
@@ -19,6 +20,7 @@ const { command, token } = require("./config.json");
 const CYBERGIRLZ = "https://www.youtube.com/watch?v=IMgWnCMAigw";
 
 const audioPlayer = createAudioPlayer();
+let voiceConnection = null;
 
 client.on("messageCreate", async (message) => {
   if (
@@ -44,11 +46,12 @@ client.on("messageCreate", async (message) => {
     return;
   }
 
-  joinVoiceChannel({
+  voiceConnection = joinVoiceChannel({
     guildId: message.guild.id,
     channelId: voiceChannel.id,
     adapterCreator: message.guild?.voiceAdapterCreator,
-  }).subscribe(audioPlayer);
+  });
+  voiceConnection.subscribe(audioPlayer);
 
   const videoInfo = await getInfo(CYBERGIRLZ);
   const resource = createAudioResource(
@@ -59,6 +62,24 @@ client.on("messageCreate", async (message) => {
     })
   );
   audioPlayer.play(resource);
+
+  let idleStartTime = Date.now();
+  audioPlayer.on(AudioPlayerStatus.Idle, () => {
+    idleStartTime = Date.now();
+  });
+  const disconnectAfterIdle = setInterval(() => {
+    const elapsedTime = Date.now() - idleStartTime;
+    if (
+      elapsedTime > 60000 &&
+      audioPlayer.state.status == AudioPlayerStatus.Idle
+    ) {
+      if (voiceConnection) {
+        voiceConnection.disconnect(VoiceConnectionDisconnectReason.IDLE);
+        voiceConnection = null;
+      }
+      clearInterval(disconnectAfterIdle);
+    }
+  }, 1000);
 });
 
 client.login(token).catch((e) => console.log(e));
