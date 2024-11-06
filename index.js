@@ -14,11 +14,16 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
-const { downloadFromInfo, getInfo } = require("ytdl-core");
+const {
+  createAgent,
+  downloadFromInfo,
+  getInfo,
+} = require("@distube/ytdl-core");
 const { command, token } = require("./config.json");
+const { readFileSync } = require("fs");
 
 const CYBERGIRLZ = "https://www.youtube.com/watch?v=IMgWnCMAigw";
-
+const agent = createAgent(JSON.parse(readFileSync("cookies.json")));
 const audioPlayer = createAudioPlayer();
 let voiceConnection = null;
 
@@ -35,13 +40,13 @@ client.on("messageCreate", async (message) => {
   const voiceChannel = message.member?.voice.channel;
   if (!voiceChannel) {
     await message.channel.send(
-      "You need to be in a voice channel you stupid moid!"
+      "You need to be in a voice channel you stupid moid!",
     );
     return;
   }
   if (!voiceChannel.joinable) {
     await message.channel.send(
-      `Voice channel ${voiceChannel.name} isn't joinable?`
+      `Voice channel ${voiceChannel.name} isn't joinable?`,
     );
     return;
   }
@@ -53,13 +58,13 @@ client.on("messageCreate", async (message) => {
   });
   voiceConnection.subscribe(audioPlayer);
 
-  const videoInfo = await getInfo(CYBERGIRLZ);
+  const videoInfo = await getInfo(CYBERGIRLZ, { agent });
   const resource = createAudioResource(
     downloadFromInfo(videoInfo, {
       filter: "audioonly",
       quality: "highestaudio",
       highWaterMark: 1 << 25,
-    })
+    }),
   );
   audioPlayer.play(resource);
 
@@ -83,4 +88,3 @@ client.on("messageCreate", async (message) => {
 });
 
 client.login(token).catch((e) => console.log(e));
-
