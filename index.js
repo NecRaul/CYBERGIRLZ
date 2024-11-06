@@ -19,21 +19,34 @@ const {
   downloadFromInfo,
   getInfo,
 } = require("@distube/ytdl-core");
-const { command, token } = require("./config.json");
+const { token } = require("./config.json");
 const { readFileSync } = require("fs");
 
-const CYBERGIRLZ = "https://www.youtube.com/watch?v=IMgWnCMAigw";
-const agent = createAgent(JSON.parse(readFileSync("cookies.json")));
+const COMMANDS = ["nonna", "shadilay", "ymca"];
+const VIDEOS = {
+  nonna: "https://www.youtube.com/watch?v=IMgWnCMAigw",
+  shadilay: "https://www.youtube.com/watch?v=2uRLJZxINAQ",
+  ymca: "https://www.youtube.com/watch?v=_DRNljTgiyg",
+};
+
 const audioPlayer = createAudioPlayer();
 let voiceConnection = null;
+const agent = createAgent(JSON.parse(readFileSync("cookies.json")));
 
 client.on("messageCreate", async (message) => {
+  let command = message.content.trimEnd().toLowerCase().slice(1);
   if (
     !message.guild ||
     message.author.bot ||
-    message.content.trimEnd() != `${command}` ||
     audioPlayer.state.status != AudioPlayerStatus.Idle
   ) {
+    return;
+  }
+
+  if (!COMMANDS.includes(command)) {
+    await message.channel.send(
+      `Command \`!${command}\` is invalid, just like you moid!`,
+    );
     return;
   }
 
@@ -58,7 +71,21 @@ client.on("messageCreate", async (message) => {
   });
   voiceConnection.subscribe(audioPlayer);
 
-  const videoInfo = await getInfo(CYBERGIRLZ, { agent });
+  let videoUrl = "";
+  switch (command) {
+    case "nonna":
+      videoUrl = VIDEOS.nonna;
+      break;
+    case "shadilay":
+      videoUrl = VIDEOS.shadilay;
+      break;
+    case "ymca":
+      videoUrl = VIDEOS.ymca;
+      break;
+    default:
+      return;
+  }
+  let videoInfo = await getInfo(videoUrl, { agent });
   const resource = createAudioResource(
     downloadFromInfo(videoInfo, {
       filter: "audioonly",
