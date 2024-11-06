@@ -4,7 +4,7 @@ Nonna approved Discord bot.
 
 ## How to run it
 
-Replace the token in `config.json` with your bot's token.
+Replace the token in `config.json` with your bot's token and paste your YouTube cookies to `cookies.json`.
 
 ```Bash
 node index.js
