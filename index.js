@@ -34,15 +34,16 @@ let voiceConnection = null;
 const agent = createAgent(JSON.parse(readFileSync("cookies.json")));
 
 client.on("messageCreate", async (message) => {
-  let command = message.content.trimEnd().toLowerCase().slice(1);
   if (
     !message.guild ||
     message.author.bot ||
+    message.content.charAt(0) !== "!" ||
     audioPlayer.state.status != AudioPlayerStatus.Idle
   ) {
     return;
   }
 
+  let command = message.content.trimEnd().toLowerCase().slice(1);
   if (!COMMANDS.includes(command)) {
     await message.channel.send(
       `Command \`!${command}\` is invalid, just like you moid!`,
