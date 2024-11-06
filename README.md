@@ -1,6 +1,8 @@
 # CYBERGIRLZ
 
-Nonna approved Discord bot.
+Nonna (and MAGA) approved Discord bot.
+
+![MAGA 2024](MAGA2024.jpg)
 
 ## How to run it
 
@@ -9,6 +11,12 @@ Replace the token in `config.json` with your bot's token and paste your YouTube 
 ```Bash
 node index.js
 ```
+
+## Commands
+
+* `!nonna`
+* `!shadilay`
+* `!ymca`
 
 ## Bot permissions
 
